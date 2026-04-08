@@ -1,68 +1,47 @@
-// 🔥 CONFIG
-const url = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container";
-const apiKey = "SUA_API_KEY_PUBLICA_AQUI";
+const SUPABASE_URL = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container";
+const API_KEY = "COLOQUE_AQUI_SUA_ANON_KEY"; // NÃO usar a secret!
 
-// 🗺️ Criar mapa
-const map = L.map('map').setView([-23.47, -47.44], 13);
+// Inicializa mapa
+const map = L.map('map').setView([-23.47, -47.44], 14);
 
 // Camada do mapa
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-  .addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
 
-// 📦 Função para carregar lixeiras
-async function carregarLixeiras() {
-  const res = await fetch(url, {
-    headers: {
-      "apikey": apiKey,
-      "Authorization": "Bearer " + apiKey
-    }
-  });
-
-  const data = await res.json();
-
-  data.forEach(lixeira => {
-
-    if (!lixeira.latitude || !lixeira.longitude) return;
-
-    let cor, texto;
-
-    if (lixeira.status === true) {
-      cor = "red";
-      texto = "Cheio 🔴";
-    } else {
-      cor = "green";
-      texto = "Vazio 🟢";
-    }
-
-    const marker = L.circleMarker(
-      [lixeira.latitude, lixeira.longitude],
-      {
-        radius: 10,
-        color: cor,
-        fillColor: cor,
-        fillOpacity: 0.7
+// Função pra buscar dados
+async function carregarContainers() {
+  try {
+    const response = await fetch(SUPABASE_URL, {
+      headers: {
+        "apikey": API_KEY,
+        "Authorization": `Bearer ${API_KEY}`
       }
-    ).addTo(map);
+    });
 
-    marker.bindPopup(
-      `<b>${lixeira["endereço"]}</b><br>${texto}`
-    );
-  });
+    const data = await response.json();
+
+    data.forEach(container => {
+      const cor = container.status ? "red" : "green";
+
+      const marker = L.circleMarker(
+        [container.latitude, container.longitude],
+        {
+          color: cor,
+          radius: 10
+        }
+      ).addTo(map);
+
+      marker.bindPopup(`
+        <b>${container.endereco}</b><br>
+        Status: ${container.status ? "Cheio 🚨" : "Disponível ✅"}
+      `);
+    });
+
+  } catch (error) {
+    console.error("Erro ao carregar dados:", error);
+  }
 }
 
-// 🔄 Atualização automática
-setInterval(() => {
-
-  // limpa os marcadores antigos
-  map.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker) {
-      map.removeLayer(layer);
-    }
-  });
-
-  carregarLixeiras();
-
-}, 5000);
-
-// primeira carga
-carregarLixeiras();
+// Carregar ao iniciar
+carregarContainers();
