@@ -2,20 +2,36 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Waze do Lixo</title>
+  <title>Coleta de Lixo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Leaflet (mapa) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
 <body>
 
-  <h1>🗺️ Waze do Lixo</h1>
-  <div id="map"></div>
+<header>
+  ♻️ Waze do Lixo
+</header>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+<div id="map"></div>
+
+<!-- Botões flutuantes -->
+<div class="controls">
+  <button onclick="irParaMinhaLocalizacao()">📍</button>
+  <button onclick="atualizarMapa()">🔄</button>
+</div>
+
+<!-- Legenda -->
+<div class="legenda">
+  <div><span class="verde"></span> Disponível</div>
+  <div><span class="vermelho"></span> Cheio</div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

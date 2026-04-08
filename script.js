@@ -1,15 +1,15 @@
 const SUPABASE_URL = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container";
-const API_KEY = "COLOQUE_AQUI_SUA_ANON_KEY"; // NÃO usar a secret!
+const API_KEY = "SUA_ANON_KEY_AQUI";
 
-// Inicializa mapa
-const map = L.map('map').setView([-23.47, -47.44], 14);
+const map = L.map('map').setView([-23.47, -47.44], 13);
 
-// Camada do mapa
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Função pra buscar dados
+let markers = [];
+
+// Carregar containers
 async function carregarContainers() {
   try {
     const response = await fetch(SUPABASE_URL, {
@@ -21,27 +21,53 @@ async function carregarContainers() {
 
     const data = await response.json();
 
-    data.forEach(container => {
-      const cor = container.status ? "red" : "green";
+    // Limpar markers antigos
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
 
-      const marker = L.circleMarker(
-        [container.latitude, container.longitude],
-        {
-          color: cor,
-          radius: 10
-        }
-      ).addTo(map);
+    data.forEach(c => {
+      const cor = c.status ? "red" : "green";
+
+      const marker = L.circleMarker([c.latitude, c.longitude], {
+        color: cor,
+        radius: 10
+      }).addTo(map);
 
       marker.bindPopup(`
-        <b>${container.endereco}</b><br>
-        Status: ${container.status ? "Cheio 🚨" : "Disponível ✅"}
+        <b>${c.endereco}</b><br>
+        Status: ${c.status ? "Cheio 🚨" : "Disponível ✅"}
       `);
+
+      markers.push(marker);
     });
 
-  } catch (error) {
-    console.error("Erro ao carregar dados:", error);
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// Carregar ao iniciar
+// 📍 Ir para localização do usuário
+function irParaMinhaLocalizacao() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    map.setView([lat, lng], 15);
+
+    L.marker([lat, lng])
+      .addTo(map)
+      .bindPopup("Você está aqui 📍")
+      .openPopup();
+  });
+}
+
+// 🔄 Atualizar mapa
+function atualizarMapa() {
+  carregarContainers();
+}
+
+// Auto atualizar (tipo Waze)
+setInterval(carregarContainers, 10000);
+
+// Inicializar
 carregarContainers();
