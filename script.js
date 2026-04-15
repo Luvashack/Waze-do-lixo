@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container";
-const API_KEY = "SUA_ANON_KEY_AQUI";
+const API_KEY = "sb_publishable_fHPmub9Khy8ZWhGEvYq7Fg_KPMwAlrC";
 
 const map = L.map('map').setView([-23.47, -47.44], 13);
 
@@ -71,3 +71,5 @@ setInterval(carregarContainers, 10000);
 
 // Inicializar
 carregarContainers();
+
+
