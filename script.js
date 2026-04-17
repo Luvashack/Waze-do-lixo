@@ -67,7 +67,7 @@ function atualizarMapa() {
 }
 
 // Auto atualizar (tipo Waze)
-setInterval(carregarContainers, 10000);
+setInterval(carregarContainers, 3000);
 
 // Inicializar
 carregarContainers();
