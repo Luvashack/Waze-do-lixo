@@ -1,4 +1,4 @@
-const SUPABASE_URL = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container";
+const SUPABASE_URL = "https://iyydygckanaydzbjkjwr.supabase.co/rest/v1/container?select=*";
 const API_KEY = "sb_publishable_fHPmub9Khy8ZWhGEvYq7Fg_KPMwAlrC";
 
 const map = L.map('map').setView([-23.47, -47.44], 13);
@@ -9,24 +9,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 let markers = [];
 
-// Carregar containers
+// 🔄 Carregar containers
 async function carregarContainers() {
   try {
     const response = await fetch(SUPABASE_URL, {
+      method: "GET",
       headers: {
         "apikey": API_KEY,
-        "Authorization": `Bearer ${API_KEY}`
+        "Authorization": `Bearer ${API_KEY}`,
+        "Cache-Control": "no-cache"
       }
     });
 
     const data = await response.json();
 
-    // Limpar markers antigos
+    console.log("Dados do Supabase:", data); // 🔍 DEBUG
+
+    // Remove markers antigos
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
     data.forEach(c => {
-      const cor = c.status ? "red" : "green";
+
+      // 🔥 CORREÇÃO: trata boolean corretamente
+      const cheio = (c.status === true || c.status == 1);
+      const cor = cheio ? "red" : "green";
 
       const marker = L.circleMarker([c.latitude, c.longitude], {
         color: cor,
@@ -35,14 +42,14 @@ async function carregarContainers() {
 
       marker.bindPopup(`
         <b>${c.endereco}</b><br>
-        Status: ${c.status ? "Cheio 🚨" : "Disponível ✅"}
+        Status: ${cheio ? "Cheio 🚨" : "Disponível ✅"}
       `);
 
       markers.push(marker);
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao carregar:", err);
   }
 }
 
@@ -61,15 +68,13 @@ function irParaMinhaLocalizacao() {
   });
 }
 
-// 🔄 Atualizar mapa
+// 🔄 Atualizar manual
 function atualizarMapa() {
   carregarContainers();
 }
 
-// Auto atualizar (tipo Waze)
+// 🔁 Auto atualização (mais rápido)
 setInterval(carregarContainers, 3000);
 
-// Inicializar
+// 🚀 Inicialização
 carregarContainers();
-
-
